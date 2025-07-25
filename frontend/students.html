@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Students - Library</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-64 bg-white shadow-lg hidden md:block">
+      <div class="p-6 text-xl font-bold border-b">Library Admin</div>
+      <nav class="mt-6">
+        <a href="dashboard.html" class="block px-6 py-3 hover:bg-gray-200">Dashboard</a>
+        <a href="books.html" class="block px-6 py-3 hover:bg-gray-200">Manage Books</a>
+        <a href="students.html" class="block px-6 py-3 hover:bg-gray-200 font-bold text-blue-600">Manage Students</a>
+        <a href="issue.html" class="block px-6 py-3 hover:bg-gray-200">Issue/Return Books</a>
+        <a href="reports.html" class="block px-6 py-3 hover:bg-gray-200">Reports</a>
+        <button id="logoutBtn" class="block w-full text-left px-6 py-3 hover:bg-gray-200 text-red-600">Logout</button>
+      </nav>
+    </aside>
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col">
+      <!-- Top Navbar (mobile) -->
+      <header class="md:hidden flex items-center justify-between bg-white shadow p-4">
+        <button id="sidebarToggle" class="text-gray-600 focus:outline-none">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <span class="font-bold text-lg">Library Admin</span>
+      </header>
+      <main class="flex-1 p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+          <h1 class="text-2xl font-bold">Manage Students</h1>
+          <button id="addStudentBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">+ Add Student</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white rounded shadow">
+            <thead>
+              <tr>
+                <th class="px-4 py-2">Name</th>
+                <th class="px-4 py-2">Email</th>
+                <th class="px-4 py-2">Roll No</th>
+                <th class="px-4 py-2">Course</th>
+                <th class="px-4 py-2">Year</th>
+                <th class="px-4 py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="studentsTable">
+              <!-- Student rows will be inserted here by JS -->
+              <tr>
+                <td class="px-4 py-2">Jane Smith</td>
+                <td class="px-4 py-2">jane@example.com</td>
+                <td class="px-4 py-2">2021001</td>
+                <td class="px-4 py-2">BSc CS</td>
+                <td class="px-4 py-2">2</td>
+                <td class="px-4 py-2 flex gap-2">
+                  <button class="editStudentBtn text-blue-600">Edit</button>
+                  <button class="deleteStudentBtn text-red-600">Delete</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+  <!-- Add/Edit Student Modal -->
+  <div id="studentModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded shadow-lg w-full max-w-md p-6 relative">
+      <button id="closeStudentModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700">&times;</button>
+      <h2 id="studentModalTitle" class="text-xl font-bold mb-4">Add Student</h2>
+      <form id="studentForm" class="space-y-4">
+        <input type="hidden" id="studentId" />
+        <div>
+          <label class="block mb-1 font-medium">Name</label>
+          <input type="text" id="studentName" class="w-full px-3 py-2 border rounded" required />
+        </div>
+        <div>
+          <label class="block mb-1 font-medium">Email</label>
+          <input type="email" id="studentEmail" class="w-full px-3 py-2 border rounded" required />
+        </div>
+        <div>
+          <label class="block mb-1 font-medium">Password</label>
+          <input type="password" id="studentPassword" class="w-full px-3 py-2 border rounded" required />
+        </div>
+        <div>
+          <label class="block mb-1 font-medium">Roll No</label>
+          <input type="text" id="studentRollNo" class="w-full px-3 py-2 border rounded" required />
+        </div>
+        <div>
+          <label class="block mb-1 font-medium">Course</label>
+          <input type="text" id="studentCourse" class="w-full px-3 py-2 border rounded" required />
+        </div>
+        <div>
+          <label class="block mb-1 font-medium">Year</label>
+          <input type="text" id="studentYear" class="w-full px-3 py-2 border rounded" required />
+        </div>
+        <div id="studentFormError" class="text-red-500 text-sm"></div>
+        <button type="submit" class="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
+      </form>
+    </div>
+  </div>
+  <script src="assets/js/scripts.js"></script>
+  <script>
+    // Sidebar toggle for mobile
+    document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('hidden');
+    });
+    // Modal logic (show/hide)
+    const studentModal = document.getElementById('studentModal');
+    document.getElementById('addStudentBtn').onclick = () => {
+      document.getElementById('studentModalTitle').textContent = 'Add Student';
+      document.getElementById('studentForm').reset();
+      document.getElementById('studentId').value = '';
+      studentModal.classList.remove('hidden');
+    };
+    document.getElementById('closeStudentModal').onclick = () => {
+      studentModal.classList.add('hidden');
+    };
+    // Close modal on outside click
+    studentModal.onclick = (e) => { if (e.target === studentModal) studentModal.classList.add('hidden'); };
+  </script>
+</body>
+</html> 

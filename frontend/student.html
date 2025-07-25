@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Portal - Library</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <!-- Top Navbar -->
+  <header class="bg-white shadow p-4 flex items-center justify-between">
+    <span id="studentWelcome" class="font-bold text-lg">Welcome, Student</span>
+    <button id="studentLogoutBtn" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Logout</button>
+  </header>
+  <main class="p-6 max-w-5xl mx-auto">
+    <h1 class="text-2xl font-bold mb-6">Library Portal</h1>
+    <div class="flex flex-col sm:flex-row gap-4 mb-6">
+      <input id="studentSearchTitle" type="text" placeholder="Search by Title" class="px-3 py-2 border rounded w-full sm:w-64" />
+      <input id="studentSearchAuthor" type="text" placeholder="Search by Author" class="px-3 py-2 border rounded w-full sm:w-64" />
+      <input id="studentSearchCategory" type="text" placeholder="Search by Category" class="px-3 py-2 border rounded w-full sm:w-64" />
+    </div>
+    <div class="overflow-x-auto mb-10">
+      <table class="min-w-full bg-white rounded shadow">
+        <thead>
+          <tr>
+            <th class="px-4 py-2">Title</th>
+            <th class="px-4 py-2">Author</th>
+            <th class="px-4 py-2">Category</th>
+            <th class="px-4 py-2">ISBN</th>
+            <th class="px-4 py-2">Quantity</th>
+          </tr>
+        </thead>
+        <tbody id="studentBooksTable">
+          <!-- Book rows will be inserted here by JS -->
+          <tr>
+            <td class="px-4 py-2">Sample Book</td>
+            <td class="px-4 py-2">John Doe</td>
+            <td class="px-4 py-2">Fiction</td>
+            <td class="px-4 py-2">1234567890</td>
+            <td class="px-4 py-2">5</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <h2 class="text-xl font-bold mb-4">My Issued Books</h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white rounded shadow">
+        <thead>
+          <tr>
+            <th class="px-4 py-2">Book</th>
+            <th class="px-4 py-2">Issue Date</th>
+            <th class="px-4 py-2">Due Date</th>
+            <th class="px-4 py-2">Return Status</th>
+            <th class="px-4 py-2">Fine</th>
+          </tr>
+        </thead>
+        <tbody id="studentIssuesTable">
+          <!-- Issued book rows will be inserted here by JS -->
+          <tr>
+            <td class="px-4 py-2">Sample Book</td>
+            <td class="px-4 py-2">2024-05-01</td>
+            <td class="px-4 py-2">2024-05-15</td>
+            <td class="px-4 py-2">issued</td>
+            <td class="px-4 py-2">0</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+  <script src="assets/js/scripts.js"></script>
+</body>
+</html> 

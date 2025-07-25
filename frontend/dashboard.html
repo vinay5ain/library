@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Library</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .bg-animate {
+      background: linear-gradient(120deg, #e0e7ff 0%, #f0f9ff 50%, #f5e1ff 100%);
+      background-size: 200% 200%;
+      animation: gradientBG 18s ease infinite;
+    }
+    @keyframes gradientBG {
+      0% {background-position:0% 50%}
+      50% {background-position:100% 50%}
+      100% {background-position:0% 50%}
+    }
+  </style>
+</head>
+<body class="bg-animate min-h-screen">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-64 bg-white/60 backdrop-blur-md shadow-lg hidden md:block border-r border-slate-200 animate-fade-in">
+      <div class="p-6 text-xl font-bold border-b border-slate-200 text-indigo-700">Library Admin</div>
+      <nav class="mt-6">
+        <a href="dashboard.html" class="block px-6 py-3 rounded-lg hover:bg-indigo-100 text-slate-700 font-semibold">Dashboard</a>
+        <a href="books.html" class="block px-6 py-3 rounded-lg hover:bg-indigo-100 text-slate-700">Manage Books</a>
+        <a href="students.html" class="block px-6 py-3 rounded-lg hover:bg-indigo-100 text-slate-700">Manage Students</a>
+        <a href="issue.html" class="block px-6 py-3 rounded-lg hover:bg-indigo-100 text-slate-700">Issue/Return Books</a>
+        <a href="reports.html" class="block px-6 py-3 rounded-lg hover:bg-indigo-100 text-slate-700">Reports</a>
+        <button id="logoutBtn" class="block w-full text-left px-6 py-3 rounded-lg hover:bg-red-100 text-red-500 font-semibold">Logout</button>
+      </nav>
+    </aside>
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col">
+      <!-- Top Navbar (mobile) -->
+      <header class="md:hidden flex items-center justify-between bg-white/60 backdrop-blur-md shadow p-4 border-b border-slate-200 animate-fade-in-down">
+        <button id="sidebarToggle" class="text-slate-600 focus:outline-none">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <span class="font-bold text-lg text-indigo-700">Library Admin</span>
+      </header>
+      <main class="flex-1 p-6 animate-fade-in-up">
+        <h1 class="text-2xl font-bold mb-6 text-slate-800">Dashboard</h1>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-white/70 backdrop-blur-md rounded-2xl shadow p-6 flex flex-col items-center border border-slate-200">
+            <div class="text-slate-500">Total Books</div>
+            <div id="totalBooks" class="text-3xl font-bold mt-2 text-indigo-700">0</div>
+          </div>
+          <div class="bg-white/70 backdrop-blur-md rounded-2xl shadow p-6 flex flex-col items-center border border-slate-200">
+            <div class="text-slate-500">Total Students</div>
+            <div id="totalStudents" class="text-3xl font-bold mt-2 text-indigo-700">0</div>
+          </div>
+          <div class="bg-white/70 backdrop-blur-md rounded-2xl shadow p-6 flex flex-col items-center border border-slate-200">
+            <div class="text-slate-500">Issued Books</div>
+            <div id="issuedBooks" class="text-3xl font-bold mt-2 text-indigo-700">0</div>
+          </div>
+          <div class="bg-white/70 backdrop-blur-md rounded-2xl shadow p-6 flex flex-col items-center border border-slate-200">
+            <div class="text-slate-500">Overdue Books</div>
+            <div id="overdueBooks" class="text-3xl font-bold mt-2 text-indigo-700">0</div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="assets/js/scripts.js"></script>
+  <script>
+    // Sidebar toggle for mobile
+    document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('hidden');
+    });
+    // Fade-in animations
+    document.querySelectorAll('.animate-fade-in').forEach(el => {
+      el.classList.add('opacity-0');
+      setTimeout(() => {
+        el.classList.remove('opacity-0');
+        el.classList.add('opacity-100', 'transition-opacity', 'duration-1000');
+      }, 100);
+    });
+    document.querySelectorAll('.animate-fade-in-down').forEach(el => {
+      el.classList.add('opacity-0', '-translate-y-8');
+      setTimeout(() => {
+        el.classList.remove('opacity-0', '-translate-y-8');
+        el.classList.add('opacity-100', 'transition-all', 'duration-1000');
+      }, 300);
+    });
+    document.querySelectorAll('.animate-fade-in-up').forEach(el => {
+      el.classList.add('opacity-0', 'translate-y-8');
+      setTimeout(() => {
+        el.classList.remove('opacity-0', 'translate-y-8');
+        el.classList.add('opacity-100', 'transition-all', 'duration-1000');
+      }, 600);
+    });
+  </script>
+</body>
+</html> 
