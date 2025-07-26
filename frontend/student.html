@@ -30,16 +30,7 @@
             <th class="px-4 py-2">Quantity</th>
           </tr>
         </thead>
-        <tbody id="studentBooksTable">
-          <!-- Book rows will be inserted here by JS -->
-          <tr>
-            <td class="px-4 py-2">Sample Book</td>
-            <td class="px-4 py-2">John Doe</td>
-            <td class="px-4 py-2">Fiction</td>
-            <td class="px-4 py-2">1234567890</td>
-            <td class="px-4 py-2">5</td>
-          </tr>
-        </tbody>
+        <tbody id="studentBooksTable"></tbody>
       </table>
     </div>
     <h2 class="text-xl font-bold mb-4">My Issued Books</h2>
@@ -54,19 +45,94 @@
             <th class="px-4 py-2">Fine</th>
           </tr>
         </thead>
-        <tbody id="studentIssuesTable">
-          <!-- Issued book rows will be inserted here by JS -->
-          <tr>
-            <td class="px-4 py-2">Sample Book</td>
-            <td class="px-4 py-2">2024-05-01</td>
-            <td class="px-4 py-2">2024-05-15</td>
-            <td class="px-4 py-2">issued</td>
-            <td class="px-4 py-2">0</td>
-          </tr>
-        </tbody>
+        <tbody id="studentIssuesTable"></tbody>
       </table>
     </div>
   </main>
-  <script src="assets/js/scripts.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    const studentId = localStorage.getItem('studentId');
+
+    if (!token || !studentId) {
+      window.location.href = 'student-login.html';
+    }
+
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
+
+    // Welcome
+    fetch(`https://library-xfx1.onrender.com/api/students/${studentId}`, { headers })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('studentWelcome').innerText = `Welcome, ${data.name}`;
+      });
+
+    // Fetch all books
+    fetch('https://library-xfx1.onrender.com/api/books', { headers })
+      .then(res => res.json())
+      .then(data => {
+        window.allBooks = data;
+        renderBooks(data);
+      });
+
+    function renderBooks(books) {
+      const table = document.getElementById('studentBooksTable');
+      table.innerHTML = '';
+      books.forEach(book => {
+        const row = `
+          <tr>
+            <td class="px-4 py-2">${book.title}</td>
+            <td class="px-4 py-2">${book.author}</td>
+            <td class="px-4 py-2">${book.category}</td>
+            <td class="px-4 py-2">${book.isbn}</td>
+            <td class="px-4 py-2">${book.quantity}</td>
+          </tr>`;
+        table.insertAdjacentHTML('beforeend', row);
+      });
+    }
+
+    ['studentSearchTitle', 'studentSearchAuthor', 'studentSearchCategory'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        const title = document.getElementById('studentSearchTitle').value.toLowerCase();
+        const author = document.getElementById('studentSearchAuthor').value.toLowerCase();
+        const category = document.getElementById('studentSearchCategory').value.toLowerCase();
+
+        const filtered = window.allBooks.filter(b =>
+          b.title.toLowerCase().includes(title) &&
+          b.author.toLowerCase().includes(author) &&
+          b.category.toLowerCase().includes(category)
+        );
+
+        renderBooks(filtered);
+      });
+    });
+
+    // Fetch issued books
+    fetch(`https://library-xfx1.onrender.com/api/issues/student/${studentId}`, { headers })
+      .then(res => res.json())
+      .then(data => {
+        const table = document.getElementById('studentIssuesTable');
+        table.innerHTML = '';
+        data.forEach(entry => {
+          const row = `
+            <tr>
+              <td class="px-4 py-2">${entry.book.title}</td>
+              <td class="px-4 py-2">${entry.issueDate.slice(0,10)}</td>
+              <td class="px-4 py-2">${entry.dueDate.slice(0,10)}</td>
+              <td class="px-4 py-2">${entry.status}</td>
+              <td class="px-4 py-2">${entry.fine}</td>
+            </tr>`;
+          table.insertAdjacentHTML('beforeend', row);
+        });
+      });
+
+    // Logout
+    document.getElementById('studentLogoutBtn').addEventListener('click', () => {
+      localStorage.clear();
+      window.location.href = 'student-login.html';
+    });
+  </script>
 </body>
-</html> 
+</html>

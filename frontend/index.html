@@ -69,10 +69,10 @@
           throw new Error(data.message || 'Login failed');
         }
 
-        // Save token in localStorage (if needed later)
+        
         localStorage.setItem('token', data.token);
 
-        // Redirect user
+      
         window.location.href = role === 'admin' ? '/admin-dashboard.html' : '/student-dashboard.html';
       } catch (error) {
         errorMsg.textContent = error.message;

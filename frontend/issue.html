@@ -50,26 +50,13 @@
                 <th class="px-4 py-2">Actions</th>
               </tr>
             </thead>
-            <tbody id="issuesTable">
-              <!-- Issue rows will be inserted here by JS -->
-              <tr>
-                <td class="px-4 py-2">Jane Smith</td>
-                <td class="px-4 py-2">Sample Book</td>
-                <td class="px-4 py-2">2024-05-01</td>
-                <td class="px-4 py-2">2024-05-15</td>
-                <td class="px-4 py-2">-</td>
-                <td class="px-4 py-2">0</td>
-                <td class="px-4 py-2">issued</td>
-                <td class="px-4 py-2">
-                  <button class="returnBookBtn text-green-600">Return</button>
-                </td>
-              </tr>
-            </tbody>
+            <tbody id="issuesTable"></tbody>
           </table>
         </div>
       </main>
     </div>
   </div>
+
   <!-- Issue Book Modal -->
   <div id="issueModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded shadow-lg w-full max-w-md p-6 relative">
@@ -78,17 +65,11 @@
       <form id="issueForm" class="space-y-4">
         <div>
           <label class="block mb-1 font-medium">Student</label>
-          <select id="issueStudent" class="w-full px-3 py-2 border rounded" required>
-            <option value="">Select Student</option>
-            <option value="student1">Jane Smith</option>
-          </select>
+          <select id="issueStudent" class="w-full px-3 py-2 border rounded" required></select>
         </div>
         <div>
           <label class="block mb-1 font-medium">Book</label>
-          <select id="issueBook" class="w-full px-3 py-2 border rounded" required>
-            <option value="">Select Book</option>
-            <option value="book1">Sample Book</option>
-          </select>
+          <select id="issueBook" class="w-full px-3 py-2 border rounded" required></select>
         </div>
         <div>
           <label class="block mb-1 font-medium">Issue Date</label>
@@ -103,24 +84,101 @@
       </form>
     </div>
   </div>
-  <script src="assets/js/scripts.js"></script>
+
   <script>
-    // Sidebar toggle for mobile
-    document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+    const apiUrl = 'https://library-xfx1.onrender.com/api';
+    const token = localStorage.getItem('token');
+
+    async function fetchIssues() {
+      const res = await fetch(`${apiUrl}/issues`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const issues = await res.json();
+      const table = document.getElementById('issuesTable');
+      table.innerHTML = issues.map(issue => `
+        <tr>
+          <td class="px-4 py-2">${issue.student?.name}</td>
+          <td class="px-4 py-2">${issue.book?.title}</td>
+          <td class="px-4 py-2">${issue.issueDate?.split('T')[0]}</td>
+          <td class="px-4 py-2">${issue.dueDate?.split('T')[0]}</td>
+          <td class="px-4 py-2">${issue.returnDate ? issue.returnDate.split('T')[0] : '-'}</td>
+          <td class="px-4 py-2">${issue.fine || 0}</td>
+          <td class="px-4 py-2">${issue.status}</td>
+          <td class="px-4 py-2">
+            ${!issue.returnDate ? `<button onclick="returnBook('${issue._id}')" class="text-green-600">Return</button>` : ''}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function returnBook(id) {
+      await fetch(`${apiUrl}/issues/${id}/return`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      fetchIssues();
+    }
+
+    document.getElementById('issueForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const student = document.getElementById('issueStudent').value;
+      const book = document.getElementById('issueBook').value;
+      const issueDate = document.getElementById('issueDate').value;
+      const dueDate = document.getElementById('dueDate').value;
+      const errorDiv = document.getElementById('issueFormError');
+      errorDiv.textContent = '';
+      try {
+        const res = await fetch(`${apiUrl}/issues`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ student, book, issueDate, dueDate })
+        });
+        if (!res.ok) throw new Error((await res.json()).message);
+        document.getElementById('issueModal').classList.add('hidden');
+        fetchIssues();
+      } catch (err) {
+        errorDiv.textContent = err.message;
+      }
+    });
+
+    async function loadDropdowns() {
+      const [studentsRes, booksRes] = await Promise.all([
+        fetch(`${apiUrl}/students`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${apiUrl}/books`, { headers: { 'Authorization': `Bearer ${token}` } })
+      ]);
+      const students = await studentsRes.json();
+      const books = await booksRes.json();
+      const studentSel = document.getElementById('issueStudent');
+      const bookSel = document.getElementById('issueBook');
+      studentSel.innerHTML = '<option value="">Select Student</option>' + students.map(s => `<option value="${s._id}">${s.name}</option>`).join('');
+      bookSel.innerHTML = '<option value="">Select Book</option>' + books.map(b => `<option value="${b._id}">${b.title}</option>`).join('');
+    }
+
+    document.getElementById('sidebarToggle')?.addEventListener('click', function () {
       const sidebar = document.getElementById('sidebar');
       sidebar.classList.toggle('hidden');
     });
-    // Modal logic (show/hide)
-    const issueModal = document.getElementById('issueModal');
-    document.getElementById('issueBookBtn').onclick = () => {
+
+    document.getElementById('issueBookBtn').onclick = async () => {
+      await loadDropdowns();
       document.getElementById('issueForm').reset();
-      issueModal.classList.remove('hidden');
+      document.getElementById('issueModal').classList.remove('hidden');
     };
+
     document.getElementById('closeIssueModal').onclick = () => {
-      issueModal.classList.add('hidden');
+      document.getElementById('issueModal').classList.add('hidden');
     };
-    // Close modal on outside click
-    issueModal.onclick = (e) => { if (e.target === issueModal) issueModal.classList.add('hidden'); };
+
+    document.getElementById('issueModal').onclick = (e) => {
+      if (e.target === document.getElementById('issueModal')) {
+        document.getElementById('issueModal').classList.add('hidden');
+      }
+    };
+
+    fetchIssues();
   </script>
 </body>
-</html> 
+</html>

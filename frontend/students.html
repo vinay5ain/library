@@ -49,24 +49,14 @@
               </tr>
             </thead>
             <tbody id="studentsTable">
-              <!-- Student rows will be inserted here by JS -->
-              <tr>
-                <td class="px-4 py-2">Jane Smith</td>
-                <td class="px-4 py-2">jane@example.com</td>
-                <td class="px-4 py-2">2021001</td>
-                <td class="px-4 py-2">BSc CS</td>
-                <td class="px-4 py-2">2</td>
-                <td class="px-4 py-2 flex gap-2">
-                  <button class="editStudentBtn text-blue-600">Edit</button>
-                  <button class="deleteStudentBtn text-red-600">Delete</button>
-                </td>
-              </tr>
+              <!-- Students will be loaded dynamically -->
             </tbody>
           </table>
         </div>
       </main>
     </div>
   </div>
+
   <!-- Add/Edit Student Modal -->
   <div id="studentModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded shadow-lg w-full max-w-md p-6 relative">
@@ -74,55 +64,112 @@
       <h2 id="studentModalTitle" class="text-xl font-bold mb-4">Add Student</h2>
       <form id="studentForm" class="space-y-4">
         <input type="hidden" id="studentId" />
-        <div>
-          <label class="block mb-1 font-medium">Name</label>
-          <input type="text" id="studentName" class="w-full px-3 py-2 border rounded" required />
-        </div>
-        <div>
-          <label class="block mb-1 font-medium">Email</label>
-          <input type="email" id="studentEmail" class="w-full px-3 py-2 border rounded" required />
-        </div>
-        <div>
-          <label class="block mb-1 font-medium">Password</label>
-          <input type="password" id="studentPassword" class="w-full px-3 py-2 border rounded" required />
-        </div>
-        <div>
-          <label class="block mb-1 font-medium">Roll No</label>
-          <input type="text" id="studentRollNo" class="w-full px-3 py-2 border rounded" required />
-        </div>
-        <div>
-          <label class="block mb-1 font-medium">Course</label>
-          <input type="text" id="studentCourse" class="w-full px-3 py-2 border rounded" required />
-        </div>
-        <div>
-          <label class="block mb-1 font-medium">Year</label>
-          <input type="text" id="studentYear" class="w-full px-3 py-2 border rounded" required />
-        </div>
+        <div><label class="block mb-1 font-medium">Name</label><input type="text" id="studentName" class="w-full px-3 py-2 border rounded" required /></div>
+        <div><label class="block mb-1 font-medium">Email</label><input type="email" id="studentEmail" class="w-full px-3 py-2 border rounded" required /></div>
+        <div><label class="block mb-1 font-medium">Password</label><input type="password" id="studentPassword" class="w-full px-3 py-2 border rounded" required /></div>
+        <div><label class="block mb-1 font-medium">Roll No</label><input type="text" id="studentRollNo" class="w-full px-3 py-2 border rounded" required /></div>
+        <div><label class="block mb-1 font-medium">Course</label><input type="text" id="studentCourse" class="w-full px-3 py-2 border rounded" required /></div>
+        <div><label class="block mb-1 font-medium">Year</label><input type="text" id="studentYear" class="w-full px-3 py-2 border rounded" required /></div>
         <div id="studentFormError" class="text-red-500 text-sm"></div>
         <button type="submit" class="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
       </form>
     </div>
   </div>
-  <script src="assets/js/scripts.js"></script>
+
   <script>
-    // Sidebar toggle for mobile
+    const API_URL = 'https://library-xfx1.onrender.com/api/students';
+
     document.getElementById('sidebarToggle')?.addEventListener('click', function() {
-      const sidebar = document.getElementById('sidebar');
-      sidebar.classList.toggle('hidden');
+      document.getElementById('sidebar').classList.toggle('hidden');
     });
-    // Modal logic (show/hide)
+
     const studentModal = document.getElementById('studentModal');
+    const studentForm = document.getElementById('studentForm');
+
     document.getElementById('addStudentBtn').onclick = () => {
       document.getElementById('studentModalTitle').textContent = 'Add Student';
-      document.getElementById('studentForm').reset();
+      studentForm.reset();
       document.getElementById('studentId').value = '';
       studentModal.classList.remove('hidden');
     };
-    document.getElementById('closeStudentModal').onclick = () => {
-      studentModal.classList.add('hidden');
-    };
-    // Close modal on outside click
+    document.getElementById('closeStudentModal').onclick = () => studentModal.classList.add('hidden');
     studentModal.onclick = (e) => { if (e.target === studentModal) studentModal.classList.add('hidden'); };
+
+    async function loadStudents() {
+      const res = await fetch(API_URL);
+      const students = await res.json();
+      const table = document.getElementById('studentsTable');
+      table.innerHTML = '';
+      students.forEach(s => {
+        table.innerHTML += `
+          <tr>
+            <td class="px-4 py-2">${s.name}</td>
+            <td class="px-4 py-2">${s.email}</td>
+            <td class="px-4 py-2">${s.rollNo}</td>
+            <td class="px-4 py-2">${s.course}</td>
+            <td class="px-4 py-2">${s.year}</td>
+            <td class="px-4 py-2 flex gap-2">
+              <button onclick='editStudent(${JSON.stringify(s)})' class="text-blue-600">Edit</button>
+              <button onclick='deleteStudent("${s._id}")' class="text-red-600">Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    async function deleteStudent(id) {
+      if (confirm('Are you sure?')) {
+        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        loadStudents();
+      }
+    }
+
+    function editStudent(student) {
+      document.getElementById('studentModalTitle').textContent = 'Edit Student';
+      document.getElementById('studentId').value = student._id;
+      document.getElementById('studentName').value = student.name;
+      document.getElementById('studentEmail').value = student.email;
+      document.getElementById('studentRollNo').value = student.rollNo;
+      document.getElementById('studentCourse').value = student.course;
+      document.getElementById('studentYear').value = student.year;
+      studentModal.classList.remove('hidden');
+    }
+
+    studentForm.onsubmit = async function (e) {
+      e.preventDefault();
+      const id = document.getElementById('studentId').value;
+      const method = id ? 'PUT' : 'POST';
+      const url = id ? `${API_URL}/${id}` : API_URL;
+      const studentData = {
+        name: document.getElementById('studentName').value,
+        email: document.getElementById('studentEmail').value,
+        password: document.getElementById('studentPassword').value,
+        rollNo: document.getElementById('studentRollNo').value,
+        course: document.getElementById('studentCourse').value,
+        year: document.getElementById('studentYear').value,
+        role: 'student'
+      };
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(studentData)
+      });
+      const result = await res.json();
+      if (!res.ok) {
+        document.getElementById('studentFormError').textContent = result.message || 'Error occurred';
+      } else {
+        studentModal.classList.add('hidden');
+        loadStudents();
+      }
+    };
+
+    // Logout
+    document.getElementById('logoutBtn').onclick = () => {
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    };
+
+    loadStudents();
   </script>
 </body>
-</html> 
+</html>
